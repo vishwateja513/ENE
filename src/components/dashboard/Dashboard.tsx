@@ -5,14 +5,7 @@ import { StatsCard } from './StatsCard';
 import { PlatformCard } from './PlatformCard';
 import { PerformanceChart } from './PerformanceChart';
 import { BatchFilter } from './BatchFilter';
-import { 
-  Trophy, 
-  Target, 
-  TrendingUp, 
-  Award,
-  Plus,
-  Code2
-} from 'lucide-react';
+import { Trophy, Target, TrendingUp, Award, Plus, Code as Code2 } from 'lucide-react';
 
 interface StudentProfile {
   id: string;
@@ -97,37 +90,23 @@ export const Dashboard: React.FC = () => {
       } else {
         // Initialize unified score if it doesn't exist
         try {
-          // Skip edge function call if using mock Supabase
-          if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project-id')) {
-            // Use mock unified score data
-            setScores({
-              total_score: 75.5,
-              leetcode_score: 80.0,
-              codeforces_score: 70.0,
-              codechef_score: 75.0,
-              gfg_score: 72.0,
-              hackerrank_score: 78.0,
-              rank_position: 5,
-            });
-          } else {
-            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-unified-score`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ studentId: user!.id }),
-            });
+          await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-unified-score`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ studentId: user!.id }),
+          });
+          
+          // Fetch again after initialization
+          const { data: newScoresData } = await supabase
+            .from('unified_scores')
+            .select('*')
+            .eq('student_id', user!.id);
             
-            // Fetch again after initialization
-            const { data: newScoresData } = await supabase
-              .from('unified_scores')
-              .select('*')
-              .eq('student_id', user!.id);
-              
-            if (newScoresData && newScoresData.length > 0) {
-              setScores(newScoresData[0]);
-            }
+          if (newScoresData && newScoresData.length > 0) {
+            setScores(newScoresData[0]);
           }
         } catch (error) {
           console.warn('Failed to initialize unified score:', error);
@@ -161,12 +140,6 @@ export const Dashboard: React.FC = () => {
 
   const handleRefreshProfile = async (profileId: string, platform: string) => {
     try {
-      // Skip edge function calls if using mock Supabase
-      if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project-id')) {
-        console.log('Mock mode: Skipping profile refresh');
-        return;
-      }
-
       // Fetch fresh stats from the platform
       await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-coding-stats`, {
         method: 'POST',
