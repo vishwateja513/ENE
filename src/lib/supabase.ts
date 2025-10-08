@@ -1,15 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
+import { mockSupabase } from './mockSupabase';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
-  );
+// Use mock Supabase if environment variables are not properly configured
+let supabase: any;
+
+if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-project-id')) {
+  console.warn('Using mock Supabase client for demo purposes. Configure proper Supabase credentials for production use.');
+  supabase = mockSupabase;
+} else {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase };
 
 export type Database = {
   public: {
