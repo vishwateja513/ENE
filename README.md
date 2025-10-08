@@ -107,3 +107,5 @@ The application uses Supabase Edge Functions to fetch real-time data from coding
 **Author**: Vishwateja Challa  
 **Version**: 1.0  
 **License**: MIT
+
+https://student-crm-with-cod-6ndb.bolt.host/
