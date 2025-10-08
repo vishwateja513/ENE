@@ -90,6 +90,21 @@ export const Dashboard: React.FC = () => {
       } else {
         // Initialize unified score if it doesn't exist
         try {
+          // Skip edge function call if using mock Supabase
+          if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project-id')) {
+            // Use mock unified score data
+            setScores({
+              total_score: 75.5,
+              leetcode_score: 80.0,
+              codeforces_score: 70.0,
+              codechef_score: 75.0,
+              gfg_score: 72.0,
+              hackerrank_score: 78.0,
+              rank_position: 5,
+            });
+            return;
+          }
+
           await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-unified-score`, {
             method: 'POST',
             headers: {

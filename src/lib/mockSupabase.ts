@@ -97,6 +97,71 @@ class MockSupabaseClient {
     return {
       select: (columns: string) => ({
         neq: (column: string, value: any) => ({
+         eq: (column: string, value: any) => ({
+           single: async () => {
+             if (table === 'students') {
+               return {
+                 data: {
+                   id: this.currentUser?.id || 'demo-user',
+                   email: this.currentUser?.email || 'demo@example.com',
+                   full_name: 'Demo User',
+                   student_id: 'DEMO001',
+                   batch: '2024',
+                   department: 'Computer Science',
+                   phone: '+1234567890',
+                   is_admin: false,
+                   created_at: new Date().toISOString(),
+                   updated_at: new Date().toISOString()
+                 }
+               };
+             }
+             return { data: null };
+           },
+           limit: (count: number) => ({
+             then: async (callback: any) => {
+               if (table === 'students') {
+                 const mockBatchmates = [
+                   {
+                     id: 'demo-mate-1',
+                     full_name: 'Alice Johnson',
+                     student_id: 'DEMO002',
+                     unified_scores: [{ total_score: 85.2, rank_position: 3 }]
+                   },
+                   {
+                     id: 'demo-mate-2', 
+                     full_name: 'Bob Smith',
+                     student_id: 'DEMO003',
+                     unified_scores: [{ total_score: 72.8, rank_position: 7 }]
+                   }
+                 ];
+                 return callback({ data: mockBatchmates });
+               }
+               return callback({ data: [] });
+             }
+           })
+         }),
+         limit: (count: number) => ({
+           then: async (callback: any) => {
+             if (table === 'students') {
+               const mockBatchmates = [
+                 {
+                   id: 'demo-mate-1',
+                   full_name: 'Alice Johnson',
+                   student_id: 'DEMO002',
+                   unified_scores: [{ total_score: 85.2, rank_position: 3 }]
+                 },
+                 {
+                   id: 'demo-mate-2', 
+                   full_name: 'Bob Smith',
+                   student_id: 'DEMO003',
+                   unified_scores: [{ total_score: 72.8, rank_position: 7 }]
+                 }
+               ];
+               return callback({ data: mockBatchmates });
+             }
+             return callback({ data: [] });
+           }
+         }),
           then: async (callback: any) => {
             // Mock department data
             if (table === 'students') {
