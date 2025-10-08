@@ -7,6 +7,11 @@ export const useAutoRefresh = () => {
   useEffect(() => {
     if (!user) return;
 
+    // Skip auto-refresh if using mock Supabase
+    if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project-id')) {
+      return;
+    }
+
     // Check for auto-refresh every hour
     const interval = setInterval(async () => {
       try {

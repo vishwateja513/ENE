@@ -96,6 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Initialize unified score for new student
       try {
+        // Skip edge function call if using mock Supabase
+        if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project-id')) {
+          return { error };
+        }
+
         await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-unified-score`, {
           method: 'POST',
           headers: {

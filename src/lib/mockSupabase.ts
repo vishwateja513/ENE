@@ -13,6 +13,11 @@ class MockSupabaseClient {
   private currentUser: MockUser | null = null;
   private currentSession: MockSession | null = null;
   private authListeners: ((event: string, session: MockSession | null) => void)[] = [];
+  private mockData = {
+    students: [] as any[],
+    coding_profiles: [] as any[],
+    unified_scores: [] as any[],
+  };
 
   auth = {
     getSession: async () => {
@@ -91,6 +96,20 @@ class MockSupabaseClient {
   from = (table: string) => {
     return {
       select: (columns: string) => ({
+        neq: (column: string, value: any) => ({
+          then: async (callback: any) => {
+            // Mock department data
+            if (table === 'students') {
+              const mockDeptData = [
+                { department: 'Computer Science' },
+                { department: 'Information Technology' },
+                { department: 'Electronics' },
+              ];
+              return callback({ data: mockDeptData });
+            }
+            return callback({ data: [] });
+          }
+        }),
         eq: (column: string, value: any) => ({
           single: async () => {
             // Mock student data
@@ -110,20 +129,79 @@ class MockSupabaseClient {
                 }
               };
             }
+            if (table === 'coding_profiles') {
+              return { data: [] };
+            }
+            if (table === 'unified_scores') {
+              return {
+                data: {
+                  id: 'demo-score',
+                  student_id: this.currentUser?.id || 'demo-user',
+                  total_score: 75.5,
+                  leetcode_score: 80.0,
+                  codeforces_score: 70.0,
+                  codechef_score: 75.0,
+                  gfg_score: 72.0,
+                  hackerrank_score: 78.0,
+                  rank_position: 5,
+                  updated_at: new Date().toISOString()
+                }
+              };
+            }
             return { data: null };
           },
           limit: (count: number) => ({
             then: async (callback: any) => {
+              if (table === 'students') {
+                const mockBatchmates = [
+                  {
+                    id: 'demo-mate-1',
+                    full_name: 'Alice Johnson',
+                    student_id: 'DEMO002',
+                    unified_scores: [{ total_score: 85.2, rank_position: 3 }]
+                  },
+                  {
+                    id: 'demo-mate-2', 
+                    full_name: 'Bob Smith',
+                    student_id: 'DEMO003',
+                    unified_scores: [{ total_score: 72.8, rank_position: 7 }]
+                  }
+                ];
+                return callback({ data: mockBatchmates });
+              }
               return callback({ data: [] });
             }
           })
         }),
         order: (column: string, options?: any) => ({
           then: async (callback: any) => {
+            if (table === 'unified_scores') {
+              const mockLeaderboard = [
+                {
+                  student_id: 'demo-user-1',
+                  total_score: 95.5,
+                  leetcode_score: 90.0,
+                  codeforces_score: 85.0,
+                  codechef_score: 88.0,
+                  gfg_score: 92.0,
+                  hackerrank_score: 87.0,
+                  students: {
+                    full_name: 'Top Student',
+                    student_id: 'TOP001',
+                    batch: '2024',
+                    department: 'Computer Science'
+                  }
+                }
+              ];
+              return callback({ data: mockLeaderboard });
+            }
             return callback({ data: [] });
           }
         }),
         then: async (callback: any) => {
+          if (table === 'coding_profiles') {
+            return callback({ data: [] });
+          }
           return callback({ data: [] });
         }
       }),
